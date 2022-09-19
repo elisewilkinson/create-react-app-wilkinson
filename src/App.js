@@ -1,50 +1,91 @@
-import React, { Component } from "react"
-import logo from "./logo.svg"
-import "./App.css"
+import React, { useEffect, useState } from "react";
+import VideoJsPlayer from "./Component/VideoPlayer/VideoJsPlayer.component";
+import "./styles.css";
 
-class LambdaDemo extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { loading: false, msg: null }
+// for Test
+const playList = [
+  {
+    src:
+      "https://vz-da6c7f24-d55.b-cdn.net/44f66069-ed0a-42cf-bfea-8332278f5f40/playlist.m3u8",
+    thumbnail:
+      "https://vz-da6c7f24-d55.b-cdn.net/44f66069-ed0a-42cf-bfea-8332278f5f40/thumbnail_1.jpg"
+  },
+  {
+    src:
+      "https://vz-da6c7f24-d55.b-cdn.net/0b45839c-845d-4c32-b9e5-9d517461a445/playlist.m3u8",
+    thumbnail:
+      "https://vz-da6c7f24-d55.b-cdn.net/0b45839c-845d-4c32-b9e5-9d517461a445/thumbnail_1.jpg"
+  },
+  {
+    src:
+      "https://vz-da6c7f24-d55.b-cdn.net/079788e7-93fe-47cb-a4d3-1ace0497a7c9/playlist.m3u8",
+    thumbnail:
+      "https://vz-da6c7f24-d55.b-cdn.net/079788e7-93fe-47cb-a4d3-1ace0497a7c9/thumbnail_1.jpg"
+  },
+  {
+    src:
+      "https://www.filimo.com/movie/watch/m3u8/mof/yes/v/1/usid/0/uid/163577869741896398/tot/1635663497/utp/91365749/movie_uid/x0p5y/movie_id/85779/devicetype/site/agentsdk/0/agentafcn/163470982622182/issmart/0/hash_url/5d6ddd11b8205d1ef6c97e7aa82c1d67/hash_urln/bd7280da509cc3aa1294a031d0f9cce5/afcn/163470982622182/movie.m3u8?bh=239",
+    thumbnail:
+      "https://static.cdn.asset.filimo.com/filimo-video/85779-thumb-t01.jpg"
+  },
+  {
+    src:
+      "https://www.filimo.com/movie/watch/m3u8/mof/yes/v/1/usid/0/uid/163577869741896398/tot/1635663497/utp/91365749/movie_uid/x0p5y/movie_id/85779/devicetype/site/agentsdk/0/agentafcn/163470982622182/issmart/0/hash_url/5d6ddd11b8205d1ef6c97e7aa82c1d67/hash_urln/bd7280da509cc3aa1294a031d0f9cce5/afcn/163470982622182/movie.m3u8?bh=239",
+    thumbnail:
+      "https://static.cdn.asset.filimo.com/filimo-video/85779-thumb-t01.jpg"
+  },
+  {
+    src:
+      "https://www.filimo.com/movie/watch/m3u8/mof/yes/v/1/usid/0/uid/163577869741896398/tot/1635663497/utp/91365749/movie_uid/x0p5y/movie_id/85779/devicetype/site/agentsdk/0/agentafcn/163470982622182/issmart/0/hash_url/5d6ddd11b8205d1ef6c97e7aa82c1d67/hash_urln/bd7280da509cc3aa1294a031d0f9cce5/afcn/163470982622182/movie.m3u8?bh=239",
+    thumbnail:
+      "https://static.cdn.asset.filimo.com/filimo-video/85779-thumb-t01.jpg"
   }
+];
 
-  handleClick = api => e => {
-    e.preventDefault()
+export default function App() {
+  const [watcher, setWatcher] = useState(0); // for Testing
+  const [source, setSource] = useState(null);
+  useEffect(() => {
+    setSource(playList[0].src);
+  }, []);
+  useEffect(() => {
+    setSource(playList[watcher].src);
+  }, [watcher]);
+  // handle next or Previous button
+  const handleAction = (actionName) => {
+    if (actionName === "next") {
+      if (watcher === playList.length - 1) {
+        setWatcher(0);
+      } else {
+        setWatcher((prev) => prev + 1);
+      }
+    } else if (actionName === "before") {
+      if (watcher === 0) {
+        setWatcher(playList.length - 1);
+      } else {
+        setWatcher((prev) => prev - 1);
+      }
+    }
+  };
 
-    this.setState({ loading: true })
-    fetch("/.netlify/functions/" + api)
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, msg: json.msg }))
-  }
+  const videoSrc = {
+    autoplay: true,
+    controls: true,
+    responsive: true
+  };
 
-  render() {
-    const { loading, msg } = this.state
-
-    return (
-      <p>
-        <button onClick={this.handleClick("hello")}>{loading ? "Loading..." : "Call Lambda"}</button>
-        <button onClick={this.handleClick("async-dadjoke")}>{loading ? "Loading..." : "Call Async Lambda"}</button>
-        <br />
-        <span>{msg}</span>
-      </p>
-    )
-  }
+  return (
+    <div className="App">
+      {source && (
+        <VideoJsPlayer
+          source={source}
+          options={videoSrc}
+          handleActionNext={() => handleAction("next")}
+          handleActionBefore={() => handleAction("before")}
+          teaserStartTime={1}
+          teaserDuration={20}
+        />
+      )}
+    </div>
+  );
 }
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <LambdaDemo />
-        </header>
-      </div>
-    )
-  }
-}
-
-export default App
